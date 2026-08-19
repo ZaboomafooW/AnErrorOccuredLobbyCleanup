@@ -25,7 +25,7 @@ That leftover lobby is what this mod cleans up. It also has a Main Menu failsafe
 
 ## What this mod does
 
-The mod listens for Steam reporting that lobby members left, disconnected, were kicked, or were banned. On a **non-host client**, if the affected player is the actual Lethal Company host, the mod tells that client to leave the current Steam lobby too.
+The mod listens for Steam reporting that lobby members left, disconnected, were kicked, or were banned. On a **non-host client**, if the affected player is the actual Lethal Company host, the mod tells that client to leave the current Steam lobby too. It also caches the Steam lobby owner when entering the lobby and uses that ID only as a fallback when Lethal Company's player-slot host Steam ID is unavailable or zero.
 
 In other words:
 
