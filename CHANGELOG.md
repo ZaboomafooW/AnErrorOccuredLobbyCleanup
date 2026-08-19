@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.6
+
+- Caches the Steam lobby owner when entering a lobby as a fallback host Steam ID.
+- Uses the cached ID only when the v81 player-slot host Steam ID is unavailable or zero, while still requiring the same current Steam lobby.
+
 ## 1.0.5
 
 - Adds a Main Menu failsafe that leaves any Steam lobby still retained after returning to the main menu.
