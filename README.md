@@ -33,11 +33,14 @@ In other words:
 
 That prevents the client from retaining a stale or dead lobby and continuing to appear joinable through Steam when there is no valid server behind that lobby anymore.
 
+As a separate shutdown safety check, if Lethal Company is quitting while `currentLobby` still exists, the mod explicitly leaves that Steam lobby before its own shutdown cleanup finishes. This applies only while the game process is already exiting.
+
 ## What this mod prevents
 
 - Your client retaining an orphaned Steam lobby after the real host is removed from it.
 - Friends seeing a misleading **Join Game** option pointing at your client when you are not the server.
 - One specific path that can cause **"An error occured!"** for other players trying to join you.
+- A retained `currentLobby` being skipped by vanilla's quit-time `Disconnect()` path when `StartOfRound.Instance` is already null.
 
 ## What this mod does NOT do
 
@@ -47,14 +50,15 @@ That prevents the client from retaining a stale or dead lobby and continuing to 
 - It does **not** fix the error when **you** are trying to join somebody else's broken lobby.
 - It does **not** make late joining work by itself.
 - It does **not** make an invalid lobby valid.
-- It does **not** close a legitimate Steam lobby that the actual host is still keeping open.
+- It does **not** close a legitimate Steam lobby that the actual host is still keeping open during normal gameplay.
 
-If the actual host remains in the Steam lobby, this mod has nothing to clean up and does nothing.
+If the actual host remains in the Steam lobby, the host-departure cleanup has nothing to clean up and does nothing.
 
 ## Compatibility
 
-- Client-side safety fix.
-- Does nothing when you are the host.
+- Client-side stale-lobby safety fix during gameplay.
+- Host-departure cleanup does nothing when you are the host.
+- Quit-time cleanup may leave the current Steam lobby for either a host or client because the game application is already exiting.
 - Does not require a specific late-join or lobby mod.
 - Designed to coexist with mods that intentionally retain the Steam lobby for legitimate late joining when the host is actually running them.
 - Targets Lethal Company v81.

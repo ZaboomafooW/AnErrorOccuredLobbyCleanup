@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4
+
+- Explicitly leaves any retained Steam lobby when the game application is quitting.
+- Covers the v81 shutdown gap where `Disconnect()` does not enter its cleanup path if `StartOfRound.Instance` is already null.
+
 ## 1.0.3
 
 - Cleans up a retained Steam lobby when Steam reports that the actual Lethal Company host was kicked from the lobby.

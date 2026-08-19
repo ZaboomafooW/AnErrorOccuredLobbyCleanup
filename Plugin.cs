@@ -10,7 +10,7 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "ZaboomafooW.AnErrorOccuredLobbyCleanup";
     public const string PluginName = "An Error Occured Lobby Cleanup";
-    public const string PluginVersion = "1.0.3";
+    public const string PluginVersion = "1.0.4";
 
     private static ManualLogSource? LogSource;
     private bool _subscribed;
@@ -31,6 +31,13 @@ public sealed class Plugin : BaseUnityPlugin
 
     private void OnApplicationQuit()
     {
+        GameNetworkManager? gameNetworkManager = GameNetworkManager.Instance;
+        if (gameNetworkManager != null && !gameNetworkManager.disableSteam && gameNetworkManager.currentLobby.HasValue)
+        {
+            Logger.LogInfo("[AnErrorOccuredLobbyCleanup] Application quitting; leaving current Steam lobby.");
+            gameNetworkManager.LeaveCurrentSteamLobby();
+        }
+
         if (_subscribed)
         {
             SteamMatchmaking.OnLobbyMemberLeave -= OnLobbyMemberLeave;
