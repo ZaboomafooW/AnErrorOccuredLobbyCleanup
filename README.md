@@ -29,6 +29,8 @@ The mod listens for Steam reporting that lobby members left, disconnected, were 
 
 Host identity is cached per Steam lobby. The lobby owner at entry is only a provisional fallback. When Lethal Company provides a non-zero host Steam ID in player slot 0 during host resolution, that verified ID replaces the fallback. The cached lobby and host IDs are cleared when that lobby membership ends, when Main Menu is reached, when a new lobby is entered, or when the application quits, so a previous lobby cannot supply the host ID for a later lobby.
 
+On a non-host client, if Steam reports that this client itself has already been removed from its current Steam lobby, the mod clears only Lethal Company's retained local Steam-lobby bookkeeping (`currentLobby`, `steamIdsInLobby`, and the per-lobby host cache). It does not disconnect the active Lethal Company Netcode session.
+
 In other words:
 
 **Real host is removed from the Steam lobby -> this client leaves the Steam lobby too.**

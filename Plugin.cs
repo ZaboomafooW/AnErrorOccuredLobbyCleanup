@@ -11,7 +11,7 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "ZaboomafooW.AnErrorOccuredLobbyCleanup";
     public const string PluginName = "An Error Occured Lobby Cleanup";
-    public const string PluginVersion = "1.0.7";
+    public const string PluginVersion = "1.0.8";
 
     private static ManualLogSource? LogSource;
     private static ulong CachedLobbyId;
@@ -134,7 +134,7 @@ public sealed class Plugin : BaseUnityPlugin
 
         if (friend.Id.Value == SteamClient.SteamId.Value)
         {
-            ClearHostCacheForLobby(callbackLobbyId);
+            HandleLocalLobbyRemoval(callbackLobbyId, departureReason);
             return;
         }
 
@@ -172,6 +172,36 @@ public sealed class Plugin : BaseUnityPlugin
 
         gameNetworkManager.LeaveCurrentSteamLobby();
         ClearHostCacheForLobby(callbackLobbyId);
+    }
+
+    private static void HandleLocalLobbyRemoval(ulong lobbyId, string removalReason)
+    {
+        GameNetworkManager? gameNetworkManager = GameNetworkManager.Instance;
+        if (gameNetworkManager == null || gameNetworkManager.disableSteam || gameNetworkManager.isHostingGame)
+        {
+            ClearHostCacheForLobby(lobbyId);
+            return;
+        }
+
+        if (!gameNetworkManager.currentLobby.HasValue)
+        {
+            ClearHostCacheForLobby(lobbyId);
+            return;
+        }
+
+        Lobby currentLobby = gameNetworkManager.currentLobby.Value;
+        if (currentLobby.Id.Value != lobbyId)
+        {
+            ClearHostCacheForLobby(lobbyId);
+            return;
+        }
+
+        LogSource?.LogWarning(
+            $"[AnErrorOccuredLobbyCleanup] Steam reports this client {removalReason} lobby {lobbyId}; clearing retained local lobby state.");
+
+        gameNetworkManager.SetCurrentLobbyNull();
+        gameNetworkManager.steamIdsInLobby.Clear();
+        ClearHostCacheForLobby(lobbyId);
     }
 
     private static ulong ResolveOriginalHostSteamId(ulong lobbyId)

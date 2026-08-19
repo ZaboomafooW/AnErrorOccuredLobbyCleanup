@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.8
+
+- On a non-host client, clears retained local Steam lobby bookkeeping if Steam reports that this client itself left, disconnected, was kicked, or was banned from its current lobby.
+- The self-removal path only nulls `currentLobby`, clears `steamIdsInLobby`, and clears the per-lobby host cache; it does not disconnect or alter the active Netcode game session.
+
 ## 1.0.7
 
 - Tightens the per-lobby host Steam ID cache so a verified player-slot-0 host replaces the provisional lobby-entry owner.
