@@ -10,7 +10,7 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "ZaboomafooW.AnErrorOccuredLobbyCleanup";
     public const string PluginName = "An Error Occured Lobby Cleanup";
-    public const string PluginVersion = "1.0.1";
+    public const string PluginVersion = "1.0.2";
 
     private static ManualLogSource? LogSource;
     private bool _subscribed;
@@ -20,10 +20,11 @@ public sealed class Plugin : BaseUnityPlugin
         LogSource = Logger;
 
         SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeave;
+        SteamMatchmaking.OnLobbyMemberDisconnected += OnLobbyMemberDisconnected;
         _subscribed = true;
 
         Logger.LogInfo($"[AnErrorOccuredLobbyCleanup] Loaded v{PluginVersion}");
-        Logger.LogInfo("[AnErrorOccuredLobbyCleanup] Steam lobby host-leave hook succeeded.");
+        Logger.LogInfo("[AnErrorOccuredLobbyCleanup] Steam lobby host-departure hooks succeeded.");
     }
 
     private void OnApplicationQuit()
@@ -31,6 +32,7 @@ public sealed class Plugin : BaseUnityPlugin
         if (_subscribed)
         {
             SteamMatchmaking.OnLobbyMemberLeave -= OnLobbyMemberLeave;
+            SteamMatchmaking.OnLobbyMemberDisconnected -= OnLobbyMemberDisconnected;
             _subscribed = false;
         }
 
@@ -38,6 +40,16 @@ public sealed class Plugin : BaseUnityPlugin
     }
 
     private static void OnLobbyMemberLeave(Lobby lobby, Friend friend)
+    {
+        HandleHostDeparture(lobby, friend, "left");
+    }
+
+    private static void OnLobbyMemberDisconnected(Lobby lobby, Friend friend)
+    {
+        HandleHostDeparture(lobby, friend, "disconnected from");
+    }
+
+    private static void HandleHostDeparture(Lobby lobby, Friend friend, string departureReason)
     {
         GameNetworkManager? gameNetworkManager = GameNetworkManager.Instance;
         if (gameNetworkManager == null || gameNetworkManager.disableSteam || gameNetworkManager.isHostingGame)
@@ -72,7 +84,7 @@ public sealed class Plugin : BaseUnityPlugin
         }
 
         LogSource?.LogWarning(
-            $"[AnErrorOccuredLobbyCleanup] Actual Lethal Company host {hostSteamId} left Steam lobby {lobby.Id.Value}; leaving orphaned lobby.");
+            $"[AnErrorOccuredLobbyCleanup] Actual Lethal Company host {hostSteamId} {departureReason} Steam lobby {lobby.Id.Value}; leaving orphaned lobby.");
 
         gameNetworkManager.LeaveCurrentSteamLobby();
     }

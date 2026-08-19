@@ -10,11 +10,11 @@ Some late-join and lobby-management mods intentionally stop players from leaving
 
 The problem is when **only a non-host client has that behavior**.
 
-In that situation, the real host can leave the Steam lobby normally when the round starts while the modded client stays behind. Steam can then leave that client holding the old lobby even though they are **not** the Lethal Company server.
+In that situation, the real host can leave or disconnect from the Steam lobby while the modded client stays behind. Steam can then leave that client holding the old lobby even though they are **not** the Lethal Company server.
 
 The result can look like this:
 
-1. The real host starts the round and leaves the Steam lobby.
+1. The real host leaves or disconnects from the Steam lobby.
 2. A non-host client remains in the Steam lobby because of another mod.
 3. Steam keeps the lobby alive with that client still in it.
 4. Friends can still see **Join Game** for that client.
@@ -25,17 +25,17 @@ That leftover lobby is what this mod cleans up.
 
 ## What this mod does
 
-The mod listens for Steam lobby members leaving. On a **non-host client**, if the player who left is the actual Lethal Company host, the mod tells that client to leave the current Steam lobby too.
+The mod listens for Steam lobby members leaving or disconnecting. On a **non-host client**, if the player who left or disconnected is the actual Lethal Company host, the mod tells that client to leave the current Steam lobby too.
 
 In other words:
 
-**Real host leaves the Steam lobby -> this client leaves the Steam lobby too.**
+**Real host leaves or disconnects from the Steam lobby -> this client leaves the Steam lobby too.**
 
 That prevents the client from retaining a stale or dead lobby and continuing to appear joinable through Steam when there is no valid server behind that lobby anymore.
 
 ## What this mod prevents
 
-- Your client retaining an orphaned Steam lobby after the real host leaves it.
+- Your client retaining an orphaned Steam lobby after the real host leaves or disconnects from it.
 - Friends seeing a misleading **Join Game** option pointing at your client when you are not the server.
 - One specific path that can cause **"An error occured!"** for other players trying to join you.
 
