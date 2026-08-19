@@ -1,8 +1,8 @@
 # AnErrorOccuredLobbyCleanup
 
-> **Important:** This mod does **not** remove or generally fix Lethal Company's **"An error occured!"** message. It does **not** fix errors you get while trying to join somebody else, and it does not make broken lobbies joinable.
-
-This mod prevents one specific cause of that error **for other players trying to join you**: a stale Steam lobby that still points at your client after the real Lethal Company host has already left it.
+> **Important:** Does **NOT** fix the error for you nor every cause of it. Installing this mod does **not** make **"An error occured!"** go away when **you** are trying to join somebody else.
+>
+> It only prevents one specific stale-lobby problem that can cause **other players** to get **"An error occured!"** when they try to join **you**. It cleans up the Steam lobby your client would otherwise leave behind after the real Lethal Company host is gone.
 
 ## What problem does this fix?
 
@@ -10,7 +10,7 @@ Some late-join and lobby-management mods intentionally stop players from leaving
 
 The problem is when **only a non-host client has that behavior**.
 
-In that situation, the real host can leave the Steam lobby normally when the round starts while the modded client stays behind. Steam can then leave that client holding the old lobby even though they are **not** the Lethal Company server. Because Steam still sees a member in that lobby, the stale entry can remain advertised for as long as that client continues to hold it.
+In that situation, the real host can leave the Steam lobby normally when the round starts while the modded client stays behind. Steam can then leave that client holding the old lobby even though they are **not** the Lethal Company server.
 
 The result can look like this:
 
@@ -41,6 +41,7 @@ That prevents the client from retaining a stale or dead lobby and continuing to 
 
 ## What this mod does NOT do
 
+- It does **NOT** fix **"An error occured!"** for the player who installs it.
 - It does **not** remove **"An error occured!"** from Lethal Company.
 - It does **not** fix every cause of **"An error occured!"**.
 - It does **not** fix the error when **you** are trying to join somebody else's broken lobby.

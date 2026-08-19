@@ -1,8 +1,8 @@
 {
   "name": "AnErrorOccuredLobbyCleanup",
-  "version_number": "1.0.0",
+  "version_number": "1.0.1",
   "website_url": "https://github.com/ZaboomafooW/AnErrorOccuredLobbyCleanup",
-  "description": "Prevents your client from leaving behind stale Steam lobbies when the real host leaves, stopping other players from seeing a false Join Game target that can lead to \"An error occured!\". Does not fix the error for you or every cause of it.",
+  "description": "Prevents stale Steam lobbies from staying joinable after the real host leaves, so other players do not hit \"An error occured!\" trying to join you. Does NOT fix the error for the player installing this mod, nor every cause of it.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2305"
   ]
