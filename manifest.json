@@ -1,6 +1,6 @@
 {
   "name": "AnErrorOccuredLobbyCleanup",
-  "version_number": "1.0.8",
+  "version_number": "1.0.9",
   "website_url": "https://github.com/ZaboomafooW/AnErrorOccuredLobbyCleanup",
   "description": "Cleans stale Steam lobby state when the real host is removed, when this client is removed from Steam, on application exit, or if a retained lobby survives into the main menu. Does NOT fix every cause.",
   "dependencies": [

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.9
+
+- If a non-host client inherits Steam ownership after the actual Lethal Company host is removed, marks that orphaned lobby non-joinable before leaving it.
+- Quarantine only runs after the existing host identity and current-lobby checks have already proven the removed player is the original Lethal Company host.
+- If Steam rejects the non-joinable update, normal orphan-lobby cleanup still proceeds.
+
 ## 1.0.8
 
 - On a non-host client, clears retained local Steam lobby bookkeeping if Steam reports that this client itself left, disconnected, was kicked, or was banned from its current lobby.

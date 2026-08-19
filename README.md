@@ -35,6 +35,8 @@ In other words:
 
 **Real host is removed from the Steam lobby -> this client leaves the Steam lobby too.**
 
+If Steam has already transferred ownership of that now-orphaned lobby to this non-host client, the mod first marks the lobby non-joinable and then leaves it. This only happens after the removed Steam member has already been verified as the original Lethal Company host.
+
 That prevents the client from retaining a stale or dead lobby and continuing to appear joinable through Steam when there is no valid server behind that lobby anymore.
 
 As a separate shutdown safety check, if Lethal Company is quitting while `currentLobby` still exists, the mod explicitly leaves that Steam lobby before its own shutdown cleanup finishes. This applies only while the game process is already exiting.
@@ -42,6 +44,7 @@ As a separate shutdown safety check, if Lethal Company is quitting while `curren
 ## What this mod prevents
 
 - Your client retaining an orphaned Steam lobby after the real host is removed from it.
+- An inherited orphan lobby remaining joinable during the brief window before this client leaves it.
 - Friends seeing a misleading **Join Game** option pointing at your client when you are not the server.
 - One specific path that can cause **"An error occured!"** for other players trying to join you.
 - A retained `currentLobby` being skipped by vanilla's quit-time `Disconnect()` path when `StartOfRound.Instance` is already null.

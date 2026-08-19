@@ -11,7 +11,7 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "ZaboomafooW.AnErrorOccuredLobbyCleanup";
     public const string PluginName = "An Error Occured Lobby Cleanup";
-    public const string PluginVersion = "1.0.8";
+    public const string PluginVersion = "1.0.9";
 
     private static ManualLogSource? LogSource;
     private static ulong CachedLobbyId;
@@ -170,8 +170,38 @@ public sealed class Plugin : BaseUnityPlugin
         LogSource?.LogWarning(
             $"[AnErrorOccuredLobbyCleanup] Actual Lethal Company host {hostSteamId} {departureReason} Steam lobby {callbackLobbyId}; leaving orphaned lobby.");
 
+        QuarantineInheritedLobbyIfOwned(lobby, hostSteamId);
         gameNetworkManager.LeaveCurrentSteamLobby();
         ClearHostCacheForLobby(callbackLobbyId);
+    }
+
+    private static void QuarantineInheritedLobbyIfOwned(Lobby lobby, ulong hostSteamId)
+    {
+        try
+        {
+            ulong localSteamId = SteamClient.SteamId.Value;
+            if (localSteamId == 0UL || localSteamId == hostSteamId || lobby.Owner.Id.Value != localSteamId)
+            {
+                return;
+            }
+
+            bool quarantined = lobby.SetJoinable(false);
+            if (quarantined)
+            {
+                LogSource?.LogWarning(
+                    $"[AnErrorOccuredLobbyCleanup] This client inherited Steam lobby {lobby.Id.Value}; marked it non-joinable before leaving.");
+            }
+            else
+            {
+                LogSource?.LogWarning(
+                    $"[AnErrorOccuredLobbyCleanup] This client inherited Steam lobby {lobby.Id.Value}, but Steam did not accept the non-joinable quarantine; leaving anyway.");
+            }
+        }
+        catch (System.Exception exception)
+        {
+            LogSource?.LogWarning(
+                $"[AnErrorOccuredLobbyCleanup] Failed to quarantine inherited Steam lobby {lobby.Id.Value}: {exception.Message}. Leaving anyway.");
+        }
     }
 
     private static void HandleLocalLobbyRemoval(ulong lobbyId, string removalReason)
