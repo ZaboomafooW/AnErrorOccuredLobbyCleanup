@@ -1,8 +1,14 @@
 # Changelog
 
+## 1.0.10
+
+- Standardizes cleanup wording on "orphaned Steam lobby" in logs and documentation.
+- Cleanup logs now explain that the orphaned Steam lobby is being cleaned up to prevent other players from getting "An error occured!".
+- No gameplay or network behavior changed.
+
 ## 1.0.9
 
-- If a non-host client inherits Steam ownership after the actual Lethal Company host is removed, marks that orphaned lobby non-joinable before leaving it.
+- If a non-host client inherits Steam ownership after the actual Lethal Company host is removed, marks that orphaned lobby non-joinable before cleanup.
 - Quarantine only runs after the existing host identity and current-lobby checks have already proven the removed player is the original Lethal Company host.
 - If Steam rejects the non-joinable update, normal orphan-lobby cleanup still proceeds.
 
@@ -44,10 +50,10 @@
 ## 1.0.1
 
 - Clarified that the mod does NOT fix "An error occured!" for the player installing it.
-- Clarified that it only prevents one specific stale-lobby cause of the error for other players trying to join that client.
+- Clarified that it only prevents one specific orphaned-lobby cause of the error for other players trying to join that client.
 
 ## 1.0.0
 
 - Initial public release.
 - Cleans up a retained Steam lobby on non-host clients when the actual Lethal Company host leaves that lobby.
-- Prevents the client from continuing to advertise a stale Steam join target after the real host is gone.
+- Prevents the client from continuing to advertise an orphaned Steam join target after the real host is gone.

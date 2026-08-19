@@ -11,7 +11,7 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "ZaboomafooW.AnErrorOccuredLobbyCleanup";
     public const string PluginName = "An Error Occured Lobby Cleanup";
-    public const string PluginVersion = "1.0.9";
+    public const string PluginVersion = "1.0.10";
 
     private static ManualLogSource? LogSource;
     private static ulong CachedLobbyId;
@@ -39,7 +39,7 @@ public sealed class Plugin : BaseUnityPlugin
         GameNetworkManager? gameNetworkManager = GameNetworkManager.Instance;
         if (gameNetworkManager != null && !gameNetworkManager.disableSteam && gameNetworkManager.currentLobby.HasValue)
         {
-            Logger.LogInfo("[AnErrorOccuredLobbyCleanup] Application quitting; leaving current Steam lobby.");
+            Logger.LogInfo("[AnErrorOccuredLobbyCleanup] Application quitting; exiting current Steam lobby.");
             gameNetworkManager.LeaveCurrentSteamLobby();
         }
 
@@ -70,7 +70,7 @@ public sealed class Plugin : BaseUnityPlugin
         if (gameNetworkManager != null && !gameNetworkManager.disableSteam && gameNetworkManager.currentLobby.HasValue)
         {
             LogSource?.LogWarning(
-                "[AnErrorOccuredLobbyCleanup] MainMenu loaded while a Steam lobby was still retained; leaving stale lobby.");
+                "[AnErrorOccuredLobbyCleanup] MainMenu retained an orphaned Steam lobby; cleaning it up so other players don't get \"An error occured!\"");
 
             gameNetworkManager.LeaveCurrentSteamLobby();
         }
@@ -168,7 +168,7 @@ public sealed class Plugin : BaseUnityPlugin
         }
 
         LogSource?.LogWarning(
-            $"[AnErrorOccuredLobbyCleanup] Actual Lethal Company host {hostSteamId} {departureReason} Steam lobby {callbackLobbyId}; leaving orphaned lobby.");
+            $"[AnErrorOccuredLobbyCleanup] Actual Lethal Company host {hostSteamId} {departureReason} Steam lobby {callbackLobbyId}; cleaning up orphaned Steam lobby so other players don't get \"An error occured!\"");
 
         QuarantineInheritedLobbyIfOwned(lobby, hostSteamId);
         gameNetworkManager.LeaveCurrentSteamLobby();
@@ -189,18 +189,18 @@ public sealed class Plugin : BaseUnityPlugin
             if (quarantined)
             {
                 LogSource?.LogWarning(
-                    $"[AnErrorOccuredLobbyCleanup] This client inherited Steam lobby {lobby.Id.Value}; marked it non-joinable before leaving.");
+                    $"[AnErrorOccuredLobbyCleanup] This client inherited Steam lobby {lobby.Id.Value}; marked it non-joinable before cleanup.");
             }
             else
             {
                 LogSource?.LogWarning(
-                    $"[AnErrorOccuredLobbyCleanup] This client inherited Steam lobby {lobby.Id.Value}, but Steam did not accept the non-joinable quarantine; leaving anyway.");
+                    $"[AnErrorOccuredLobbyCleanup] This client inherited Steam lobby {lobby.Id.Value}, but Steam did not accept the non-joinable quarantine; cleanup will continue.");
             }
         }
         catch (System.Exception exception)
         {
             LogSource?.LogWarning(
-                $"[AnErrorOccuredLobbyCleanup] Failed to quarantine inherited Steam lobby {lobby.Id.Value}: {exception.Message}. Leaving anyway.");
+                $"[AnErrorOccuredLobbyCleanup] Failed to quarantine inherited Steam lobby {lobby.Id.Value}: {exception.Message}. Cleanup will continue.");
         }
     }
 

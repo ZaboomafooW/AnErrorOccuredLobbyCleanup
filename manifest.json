@@ -1,8 +1,8 @@
 {
   "name": "AnErrorOccuredLobbyCleanup",
-  "version_number": "1.0.9",
+  "version_number": "1.0.10",
   "website_url": "https://github.com/ZaboomafooW/AnErrorOccuredLobbyCleanup",
-  "description": "Cleans stale Steam lobby state when the real host is removed, when this client is removed from Steam, on application exit, or if a retained lobby survives into the main menu. Does NOT fix every cause.",
+  "description": "Cleans up orphaned Steam lobbies so other players don't get 'An error occured!' from an invalid Steam join target.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2305"
   ]

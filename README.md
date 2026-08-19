@@ -1,78 +1,50 @@
 # AnErrorOccuredLobbyCleanup
 
-> **Important:** Does **NOT** fix the error for you nor every cause of it. Installing this mod does **not** make **"An error occured!"** go away when **you** are trying to join somebody else.
->
-> It only prevents one specific stale-lobby problem that can cause **other players** to get **"An error occured!"** when they try to join **you**. It cleans up the Steam lobby your client would otherwise leave behind after the real Lethal Company host is gone.
+Fixes one Steam lobby cleanup problem that can leave a non-host client advertising a lobby after the real Lethal Company host is gone.
 
-## What problem does this fix?
+> This does **not** fix every cause of **"An error occured!"**, and it does not fix a broken lobby that you are trying to join. It prevents other players from being sent to an orphaned Steam lobby that your client is still holding.
 
-Some late-join and lobby-management mods intentionally stop players from leaving the Steam lobby when a round starts. That behavior is useful when the actual host has the mod, because the host can keep the Steam lobby around and reopen it later for legitimate late joining.
+## The problem
 
-The problem is when **only a non-host client has that behavior**.
+Some late-join and lobby-management mods keep players in the Steam lobby after a round starts. That is useful when the actual host is running the mod and intentionally keeps the lobby available for late joining.
 
-In that situation, the real host can leave, disconnect from, be kicked from, or be banned from the Steam lobby while the modded client stays behind. Steam can then leave that client holding the old lobby even though they are **not** the Lethal Company server.
+The bad case is when only a non-host client keeps that Steam lobby membership. If the real host leaves, disconnects, gets kicked, or gets banned, Steam can leave the non-host client holding the old lobby even though that client is not the Lethal Company server. Steam may also transfer lobby ownership to that client.
 
-The result can look like this:
+Friends can still see **Join Game**, but the lobby no longer points to a valid Lethal Company host. Joining it can lead to **"An error occured!"**.
 
-1. The real host is removed from the Steam lobby.
-2. A non-host client remains in the Steam lobby because of another mod.
-3. Steam keeps the lobby alive with that client still in it.
-4. Friends can still see **Join Game** for that client.
-5. The displayed lobby is not backed by the actual Lethal Company host anymore.
-6. Someone tries to join it and can end up at **"An error occured!"**.
+This mod cleans up that orphaned Steam lobby so other players don't get "An error occured!" trying to join it.
 
-That leftover lobby is what this mod cleans up. It also has a Main Menu failsafe: if Lethal Company reaches the `MainMenu` scene while `currentLobby` is still retained, the mod leaves that stale Steam lobby.
+## What it does
 
-## What this mod does
+- Watches Steam lobby leave, disconnect, kick, and ban events.
+- Identifies the original Lethal Company host from player slot 0 when that Steam ID is available. The Steam lobby owner at entry is kept only as a per-lobby fallback until slot 0 can confirm the host.
+- If the real host is removed from the current Steam lobby, a non-host client cleans up its copy of that orphaned lobby.
+- If Steam has already transferred ownership of the orphaned lobby to that client, the mod marks it non-joinable before cleanup.
+- If Steam reports that the local non-host client itself has already been removed from the lobby, the mod clears the retained local Steam lobby bookkeeping without disconnecting the active Netcode game session.
+- If a retained Steam lobby survives into `MainMenu`, the mod cleans it up there as a final failsafe.
+- If the game is quitting while a Steam lobby is still retained, the mod exits that lobby during shutdown.
 
-The mod listens for Steam reporting that lobby members left, disconnected, were kicked, or were banned. On a **non-host client**, if the affected player is the actual Lethal Company host, the mod tells that client to leave the current Steam lobby too.
+The cached host Steam ID is tied to the exact Steam lobby it came from and is cleared when that lobby ends, when a new lobby is entered, on Main Menu, and on application quit. A host ID from a previous lobby is never used for a later lobby.
 
-Host identity is cached per Steam lobby. The lobby owner at entry is only a provisional fallback. When Lethal Company provides a non-zero host Steam ID in player slot 0 during host resolution, that verified ID replaces the fallback. The cached lobby and host IDs are cleared when that lobby membership ends, when Main Menu is reached, when a new lobby is entered, or when the application quits, so a previous lobby cannot supply the host ID for a later lobby.
+## What it does not change
 
-On a non-host client, if Steam reports that this client itself has already been removed from its current Steam lobby, the mod clears only Lethal Company's retained local Steam-lobby bookkeeping (`currentLobby`, `steamIdsInLobby`, and the per-lobby host cache). It does not disconnect the active Lethal Company Netcode session.
-
-In other words:
-
-**Real host is removed from the Steam lobby -> this client leaves the Steam lobby too.**
-
-If Steam has already transferred ownership of that now-orphaned lobby to this non-host client, the mod first marks the lobby non-joinable and then leaves it. This only happens after the removed Steam member has already been verified as the original Lethal Company host.
-
-That prevents the client from retaining a stale or dead lobby and continuing to appear joinable through Steam when there is no valid server behind that lobby anymore.
-
-As a separate shutdown safety check, if Lethal Company is quitting while `currentLobby` still exists, the mod explicitly leaves that Steam lobby before its own shutdown cleanup finishes. This applies only while the game process is already exiting.
-
-## What this mod prevents
-
-- Your client retaining an orphaned Steam lobby after the real host is removed from it.
-- An inherited orphan lobby remaining joinable during the brief window before this client leaves it.
-- Friends seeing a misleading **Join Game** option pointing at your client when you are not the server.
-- One specific path that can cause **"An error occured!"** for other players trying to join you.
-- A retained `currentLobby` being skipped by vanilla's quit-time `Disconnect()` path when `StartOfRound.Instance` is already null.
-
-## What this mod does NOT do
-
-- It does **NOT** fix **"An error occured!"** for the player who installs it.
-- It does **not** remove **"An error occured!"** from Lethal Company.
-- It does **not** fix every cause of **"An error occured!"**.
-- It does **not** fix the error when **you** are trying to join somebody else's broken lobby.
-- It does **not** make late joining work by itself.
-- It does **not** make an invalid lobby valid.
-- It does **not** close a legitimate Steam lobby that the actual host is still keeping open during normal gameplay.
-
-If the actual host remains in the Steam lobby, the host-departure cleanup has nothing to clean up and does nothing.
+- It does not make late joining work by itself.
+- It does not change the Lethal Company Netcode host.
+- It does not modify player state, round state, spawning, or connection approval.
+- It does not close a legitimate Steam lobby that the actual host is intentionally keeping open during normal gameplay.
+- It does not fix unrelated causes of **"An error occured!"**.
 
 ## Compatibility
 
-- Client-side stale-lobby safety fix during gameplay.
-- Host-departure cleanup does nothing when you are the host.
-- Quit-time cleanup may leave the current Steam lobby for either a host or client because the game application is already exiting.
-- Does not require a specific late-join or lobby mod.
-- Designed to coexist with mods that intentionally retain the Steam lobby for legitimate late joining when the host is actually running them.
+- Client-side cleanup for non-host players during gameplay.
+- Host-departure cleanup does nothing when you are the Lethal Company host.
+- Does not require a specific late-join or lobby-management mod.
+- Designed to coexist with mods that intentionally retain the Steam lobby when the actual host is running them.
 - Targets Lethal Company v81.
 
 ## Installation
 
-Install with Thunderstore Mod Manager/r2modman, or place the DLL in your `BepInEx/plugins` folder.
+Install with Thunderstore Mod Manager/r2modman, or place the DLL in `BepInEx/plugins`.
 
 ## Why is "Occured" misspelled?
 
