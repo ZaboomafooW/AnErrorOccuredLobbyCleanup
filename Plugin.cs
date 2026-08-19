@@ -11,7 +11,7 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "ZaboomafooW.AnErrorOccuredLobbyCleanup";
     public const string PluginName = "An Error Occured Lobby Cleanup";
-    public const string PluginVersion = "1.0.6";
+    public const string PluginVersion = "1.0.7";
 
     private static ManualLogSource? LogSource;
     private static ulong CachedLobbyId;
@@ -43,6 +43,8 @@ public sealed class Plugin : BaseUnityPlugin
             gameNetworkManager.LeaveCurrentSteamLobby();
         }
 
+        ClearHostCache();
+
         if (_subscribed)
         {
             SteamMatchmaking.OnLobbyEntered -= OnLobbyEntered;
@@ -65,32 +67,45 @@ public sealed class Plugin : BaseUnityPlugin
         }
 
         GameNetworkManager? gameNetworkManager = GameNetworkManager.Instance;
-        if (gameNetworkManager == null || gameNetworkManager.disableSteam || !gameNetworkManager.currentLobby.HasValue)
+        if (gameNetworkManager != null && !gameNetworkManager.disableSteam && gameNetworkManager.currentLobby.HasValue)
         {
-            return;
+            LogSource?.LogWarning(
+                "[AnErrorOccuredLobbyCleanup] MainMenu loaded while a Steam lobby was still retained; leaving stale lobby.");
+
+            gameNetworkManager.LeaveCurrentSteamLobby();
         }
 
-        LogSource?.LogWarning(
-            "[AnErrorOccuredLobbyCleanup] MainMenu loaded while a Steam lobby was still retained; leaving stale lobby.");
-
-        gameNetworkManager.LeaveCurrentSteamLobby();
+        ClearHostCache();
     }
 
     private static void OnLobbyEntered(Lobby lobby)
     {
-        ulong ownerSteamId = lobby.Owner.Id.Value;
-        if (ownerSteamId == 0UL)
+        GameNetworkManager? gameNetworkManager = GameNetworkManager.Instance;
+        if (gameNetworkManager == null || gameNetworkManager.disableSteam || !gameNetworkManager.currentLobby.HasValue)
         {
-            CachedLobbyId = 0UL;
-            CachedHostSteamId = 0UL;
+            ClearHostCache();
             return;
         }
 
-        CachedLobbyId = lobby.Id.Value;
+        ulong lobbyId = lobby.Id.Value;
+        if (gameNetworkManager.currentLobby.Value.Id.Value != lobbyId)
+        {
+            return;
+        }
+
+        ClearHostCache();
+
+        ulong ownerSteamId = lobby.Owner.Id.Value;
+        if (lobbyId == 0UL || ownerSteamId == 0UL)
+        {
+            return;
+        }
+
+        CachedLobbyId = lobbyId;
         CachedHostSteamId = ownerSteamId;
 
         LogSource?.LogDebug(
-            $"[AnErrorOccuredLobbyCleanup] Cached Steam lobby {CachedLobbyId} entry owner {CachedHostSteamId} as host fallback.");
+            $"[AnErrorOccuredLobbyCleanup] Cached Steam lobby {CachedLobbyId} entry owner {CachedHostSteamId} as provisional host fallback.");
     }
 
     private static void OnLobbyMemberLeave(Lobby lobby, Friend friend)
@@ -115,6 +130,14 @@ public sealed class Plugin : BaseUnityPlugin
 
     private static void HandleHostDeparture(Lobby lobby, Friend friend, string departureReason)
     {
+        ulong callbackLobbyId = lobby.Id.Value;
+
+        if (friend.Id.Value == SteamClient.SteamId.Value)
+        {
+            ClearHostCacheForLobby(callbackLobbyId);
+            return;
+        }
+
         GameNetworkManager? gameNetworkManager = GameNetworkManager.Instance;
         if (gameNetworkManager == null || gameNetworkManager.disableSteam || gameNetworkManager.isHostingGame)
         {
@@ -123,38 +146,86 @@ public sealed class Plugin : BaseUnityPlugin
 
         if (!gameNetworkManager.currentLobby.HasValue)
         {
+            ClearHostCache();
             return;
         }
 
         Lobby currentLobby = gameNetworkManager.currentLobby.Value;
-        if (currentLobby.Id.Value != lobby.Id.Value)
+        if (currentLobby.Id.Value != callbackLobbyId)
         {
             return;
         }
 
-        ulong hostSteamId = 0UL;
-        StartOfRound? startOfRound = StartOfRound.Instance;
-        if (startOfRound != null &&
-            startOfRound.allPlayerScripts != null &&
-            startOfRound.allPlayerScripts.Length > 0 &&
-            startOfRound.allPlayerScripts[0] != null)
+        if (CachedLobbyId != 0UL && CachedLobbyId != currentLobby.Id.Value)
         {
-            hostSteamId = startOfRound.allPlayerScripts[0].playerSteamId;
+            ClearHostCache();
         }
 
-        if (hostSteamId == 0UL && CachedLobbyId == lobby.Id.Value)
-        {
-            hostSteamId = CachedHostSteamId;
-        }
-
+        ulong hostSteamId = ResolveOriginalHostSteamId(callbackLobbyId);
         if (hostSteamId == 0UL || friend.Id.Value != hostSteamId)
         {
             return;
         }
 
         LogSource?.LogWarning(
-            $"[AnErrorOccuredLobbyCleanup] Actual Lethal Company host {hostSteamId} {departureReason} Steam lobby {lobby.Id.Value}; leaving orphaned lobby.");
+            $"[AnErrorOccuredLobbyCleanup] Actual Lethal Company host {hostSteamId} {departureReason} Steam lobby {callbackLobbyId}; leaving orphaned lobby.");
 
         gameNetworkManager.LeaveCurrentSteamLobby();
+        ClearHostCacheForLobby(callbackLobbyId);
+    }
+
+    private static ulong ResolveOriginalHostSteamId(ulong lobbyId)
+    {
+        ulong liveHostSteamId = GetLiveHostSteamId();
+        if (liveHostSteamId != 0UL)
+        {
+            if (CachedLobbyId != lobbyId || CachedHostSteamId != liveHostSteamId)
+            {
+                CachedLobbyId = lobbyId;
+                CachedHostSteamId = liveHostSteamId;
+
+                LogSource?.LogDebug(
+                    $"[AnErrorOccuredLobbyCleanup] Confirmed Lethal Company host {CachedHostSteamId} for Steam lobby {CachedLobbyId} from player slot 0.");
+            }
+
+            return liveHostSteamId;
+        }
+
+        if (CachedLobbyId == lobbyId)
+        {
+            return CachedHostSteamId;
+        }
+
+        return 0UL;
+    }
+
+    private static ulong GetLiveHostSteamId()
+    {
+        StartOfRound? startOfRound = StartOfRound.Instance;
+        if (startOfRound == null ||
+            startOfRound.allPlayerScripts == null ||
+            startOfRound.allPlayerScripts.Length == 0 ||
+            startOfRound.allPlayerScripts[0] == null)
+        {
+            return 0UL;
+        }
+
+        return startOfRound.allPlayerScripts[0].playerSteamId;
+    }
+
+    private static void ClearHostCacheForLobby(ulong lobbyId)
+    {
+        if (CachedLobbyId != lobbyId)
+        {
+            return;
+        }
+
+        ClearHostCache();
+    }
+
+    private static void ClearHostCache()
+    {
+        CachedLobbyId = 0UL;
+        CachedHostSteamId = 0UL;
     }
 }

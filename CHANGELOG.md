@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.7
+
+- Tightens the per-lobby host Steam ID cache so a verified player-slot-0 host replaces the provisional lobby-entry owner.
+- Resets cached lobby and host IDs when the cached membership ends, a new lobby is entered, Main Menu is reached, or the application quits.
+- Keeps cached host identity bound to its exact Steam lobby so a previous lobby cannot supply the host ID for a later lobby.
+
 ## 1.0.6
 
 - Caches the Steam lobby owner when entering a lobby as a fallback host Steam ID.

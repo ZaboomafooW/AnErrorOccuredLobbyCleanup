@@ -1,6 +1,6 @@
 {
   "name": "AnErrorOccuredLobbyCleanup",
-  "version_number": "1.0.6",
+  "version_number": "1.0.7",
   "website_url": "https://github.com/ZaboomafooW/AnErrorOccuredLobbyCleanup",
   "description": "Cleans stale Steam lobbies when the real host is removed, on application exit, or if a retained lobby survives into the main menu. Does NOT fix the error for the player installing this mod or every cause.",
   "dependencies": [

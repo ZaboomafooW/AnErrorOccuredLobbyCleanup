@@ -25,7 +25,9 @@ That leftover lobby is what this mod cleans up. It also has a Main Menu failsafe
 
 ## What this mod does
 
-The mod listens for Steam reporting that lobby members left, disconnected, were kicked, or were banned. On a **non-host client**, if the affected player is the actual Lethal Company host, the mod tells that client to leave the current Steam lobby too. It also caches the Steam lobby owner when entering the lobby and uses that ID only as a fallback when Lethal Company's player-slot host Steam ID is unavailable or zero.
+The mod listens for Steam reporting that lobby members left, disconnected, were kicked, or were banned. On a **non-host client**, if the affected player is the actual Lethal Company host, the mod tells that client to leave the current Steam lobby too.
+
+Host identity is cached per Steam lobby. The lobby owner at entry is only a provisional fallback. When Lethal Company provides a non-zero host Steam ID in player slot 0 during host resolution, that verified ID replaces the fallback. The cached lobby and host IDs are cleared when that lobby membership ends, when Main Menu is reached, when a new lobby is entered, or when the application quits, so a previous lobby cannot supply the host ID for a later lobby.
 
 In other words:
 
