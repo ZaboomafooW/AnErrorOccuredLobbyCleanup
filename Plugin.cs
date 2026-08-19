@@ -11,15 +11,18 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "ZaboomafooW.AnErrorOccuredLobbyCleanup";
     public const string PluginName = "An Error Occured Lobby Cleanup";
-    public const string PluginVersion = "1.0.5";
+    public const string PluginVersion = "1.0.6";
 
     private static ManualLogSource? LogSource;
+    private static ulong CachedLobbyId;
+    private static ulong CachedHostSteamId;
     private bool _subscribed;
 
     private void Awake()
     {
         LogSource = Logger;
 
+        SteamMatchmaking.OnLobbyEntered += OnLobbyEntered;
         SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeave;
         SteamMatchmaking.OnLobbyMemberDisconnected += OnLobbyMemberDisconnected;
         SteamMatchmaking.OnLobbyMemberKicked += OnLobbyMemberKicked;
@@ -42,6 +45,7 @@ public sealed class Plugin : BaseUnityPlugin
 
         if (_subscribed)
         {
+            SteamMatchmaking.OnLobbyEntered -= OnLobbyEntered;
             SteamMatchmaking.OnLobbyMemberLeave -= OnLobbyMemberLeave;
             SteamMatchmaking.OnLobbyMemberDisconnected -= OnLobbyMemberDisconnected;
             SteamMatchmaking.OnLobbyMemberKicked -= OnLobbyMemberKicked;
@@ -70,6 +74,23 @@ public sealed class Plugin : BaseUnityPlugin
             "[AnErrorOccuredLobbyCleanup] MainMenu loaded while a Steam lobby was still retained; leaving stale lobby.");
 
         gameNetworkManager.LeaveCurrentSteamLobby();
+    }
+
+    private static void OnLobbyEntered(Lobby lobby)
+    {
+        ulong ownerSteamId = lobby.Owner.Id.Value;
+        if (ownerSteamId == 0UL)
+        {
+            CachedLobbyId = 0UL;
+            CachedHostSteamId = 0UL;
+            return;
+        }
+
+        CachedLobbyId = lobby.Id.Value;
+        CachedHostSteamId = ownerSteamId;
+
+        LogSource?.LogDebug(
+            $"[AnErrorOccuredLobbyCleanup] Cached Steam lobby {CachedLobbyId} entry owner {CachedHostSteamId} as host fallback.");
     }
 
     private static void OnLobbyMemberLeave(Lobby lobby, Friend friend)
@@ -111,16 +132,21 @@ public sealed class Plugin : BaseUnityPlugin
             return;
         }
 
+        ulong hostSteamId = 0UL;
         StartOfRound? startOfRound = StartOfRound.Instance;
-        if (startOfRound == null ||
-            startOfRound.allPlayerScripts == null ||
-            startOfRound.allPlayerScripts.Length == 0 ||
-            startOfRound.allPlayerScripts[0] == null)
+        if (startOfRound != null &&
+            startOfRound.allPlayerScripts != null &&
+            startOfRound.allPlayerScripts.Length > 0 &&
+            startOfRound.allPlayerScripts[0] != null)
         {
-            return;
+            hostSteamId = startOfRound.allPlayerScripts[0].playerSteamId;
         }
 
-        ulong hostSteamId = startOfRound.allPlayerScripts[0].playerSteamId;
+        if (hostSteamId == 0UL && CachedLobbyId == lobby.Id.Value)
+        {
+            hostSteamId = CachedHostSteamId;
+        }
+
         if (hostSteamId == 0UL || friend.Id.Value != hostSteamId)
         {
             return;
