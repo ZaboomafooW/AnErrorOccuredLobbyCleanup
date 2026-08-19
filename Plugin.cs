@@ -10,7 +10,7 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "ZaboomafooW.AnErrorOccuredLobbyCleanup";
     public const string PluginName = "An Error Occured Lobby Cleanup";
-    public const string PluginVersion = "1.0.2";
+    public const string PluginVersion = "1.0.3";
 
     private static ManualLogSource? LogSource;
     private bool _subscribed;
@@ -21,6 +21,8 @@ public sealed class Plugin : BaseUnityPlugin
 
         SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeave;
         SteamMatchmaking.OnLobbyMemberDisconnected += OnLobbyMemberDisconnected;
+        SteamMatchmaking.OnLobbyMemberKicked += OnLobbyMemberKicked;
+        SteamMatchmaking.OnLobbyMemberBanned += OnLobbyMemberBanned;
         _subscribed = true;
 
         Logger.LogInfo($"[AnErrorOccuredLobbyCleanup] Loaded v{PluginVersion}");
@@ -33,6 +35,8 @@ public sealed class Plugin : BaseUnityPlugin
         {
             SteamMatchmaking.OnLobbyMemberLeave -= OnLobbyMemberLeave;
             SteamMatchmaking.OnLobbyMemberDisconnected -= OnLobbyMemberDisconnected;
+            SteamMatchmaking.OnLobbyMemberKicked -= OnLobbyMemberKicked;
+            SteamMatchmaking.OnLobbyMemberBanned -= OnLobbyMemberBanned;
             _subscribed = false;
         }
 
@@ -47,6 +51,16 @@ public sealed class Plugin : BaseUnityPlugin
     private static void OnLobbyMemberDisconnected(Lobby lobby, Friend friend)
     {
         HandleHostDeparture(lobby, friend, "disconnected from");
+    }
+
+    private static void OnLobbyMemberKicked(Lobby lobby, Friend friend, Friend actor)
+    {
+        HandleHostDeparture(lobby, friend, "was kicked from");
+    }
+
+    private static void OnLobbyMemberBanned(Lobby lobby, Friend friend, Friend actor)
+    {
+        HandleHostDeparture(lobby, friend, "was banned from");
     }
 
     private static void HandleHostDeparture(Lobby lobby, Friend friend, string departureReason)

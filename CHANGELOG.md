@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.3
+
+- Cleans up a retained Steam lobby when Steam reports that the actual Lethal Company host was kicked from the lobby.
+- Cleans up a retained Steam lobby when Steam reports that the actual Lethal Company host was banned from the lobby.
+
 ## 1.0.2
 
 - Cleans up a retained Steam lobby when Steam reports that the actual Lethal Company host disconnected from the lobby without leaving normally.
