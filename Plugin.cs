@@ -2,6 +2,7 @@ using BepInEx;
 using BepInEx.Logging;
 using Steamworks;
 using Steamworks.Data;
+using UnityEngine.SceneManagement;
 
 namespace AnErrorOccuredLobbyCleanup;
 
@@ -10,7 +11,7 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "ZaboomafooW.AnErrorOccuredLobbyCleanup";
     public const string PluginName = "An Error Occured Lobby Cleanup";
-    public const string PluginVersion = "1.0.4";
+    public const string PluginVersion = "1.0.5";
 
     private static ManualLogSource? LogSource;
     private bool _subscribed;
@@ -23,6 +24,7 @@ public sealed class Plugin : BaseUnityPlugin
         SteamMatchmaking.OnLobbyMemberDisconnected += OnLobbyMemberDisconnected;
         SteamMatchmaking.OnLobbyMemberKicked += OnLobbyMemberKicked;
         SteamMatchmaking.OnLobbyMemberBanned += OnLobbyMemberBanned;
+        SceneManager.sceneLoaded += OnSceneLoaded;
         _subscribed = true;
 
         Logger.LogInfo($"[AnErrorOccuredLobbyCleanup] Loaded v{PluginVersion}");
@@ -44,10 +46,30 @@ public sealed class Plugin : BaseUnityPlugin
             SteamMatchmaking.OnLobbyMemberDisconnected -= OnLobbyMemberDisconnected;
             SteamMatchmaking.OnLobbyMemberKicked -= OnLobbyMemberKicked;
             SteamMatchmaking.OnLobbyMemberBanned -= OnLobbyMemberBanned;
+            SceneManager.sceneLoaded -= OnSceneLoaded;
             _subscribed = false;
         }
 
         LogSource = null;
+    }
+
+    private static void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+    {
+        if (scene.name != "MainMenu")
+        {
+            return;
+        }
+
+        GameNetworkManager? gameNetworkManager = GameNetworkManager.Instance;
+        if (gameNetworkManager == null || gameNetworkManager.disableSteam || !gameNetworkManager.currentLobby.HasValue)
+        {
+            return;
+        }
+
+        LogSource?.LogWarning(
+            "[AnErrorOccuredLobbyCleanup] MainMenu loaded while a Steam lobby was still retained; leaving stale lobby.");
+
+        gameNetworkManager.LeaveCurrentSteamLobby();
     }
 
     private static void OnLobbyMemberLeave(Lobby lobby, Friend friend)

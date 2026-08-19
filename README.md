@@ -21,7 +21,7 @@ The result can look like this:
 5. The displayed lobby is not backed by the actual Lethal Company host anymore.
 6. Someone tries to join it and can end up at **"An error occured!"**.
 
-That leftover lobby is what this mod cleans up.
+That leftover lobby is what this mod cleans up. It also has a Main Menu failsafe: if Lethal Company reaches the `MainMenu` scene while `currentLobby` is still retained, the mod leaves that stale Steam lobby.
 
 ## What this mod does
 

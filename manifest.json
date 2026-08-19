@@ -1,8 +1,8 @@
 {
   "name": "AnErrorOccuredLobbyCleanup",
-  "version_number": "1.0.4",
+  "version_number": "1.0.5",
   "website_url": "https://github.com/ZaboomafooW/AnErrorOccuredLobbyCleanup",
-  "description": "Prevents stale Steam lobbies after the real host is removed and explicitly leaves any retained Steam lobby when the game exits. Does NOT fix the error for the player installing this mod or every cause.",
+  "description": "Cleans stale Steam lobbies when the real host is removed, on application exit, or if a retained lobby survives into the main menu. Does NOT fix the error for the player installing this mod or every cause.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2305"
   ]

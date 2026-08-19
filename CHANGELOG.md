@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.5
+
+- Adds a Main Menu failsafe that leaves any Steam lobby still retained after returning to the main menu.
+- The failsafe only touches Steam lobby state and does not disconnect or alter an active Lethal Company session.
+
 ## 1.0.4
 
 - Explicitly leaves any retained Steam lobby when the game application is quitting.
