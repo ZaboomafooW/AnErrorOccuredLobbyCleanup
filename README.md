@@ -24,7 +24,7 @@ This mod cleans up that orphaned Steam lobby so other players don't get "An erro
 - If a retained Steam lobby survives into `MainMenu`, the mod cleans it up there as a final failsafe.
 - If the game is quitting while a Steam lobby is still retained, the mod exits that lobby during shutdown.
 
-The cached host Steam ID is tied to the exact Steam lobby it came from and is cleared when that lobby ends, when a new lobby is entered, on Main Menu, and on application quit. A host ID from a previous lobby is never used for a later lobby.
+The cached host Steam ID is tied to the exact Steam lobby it came from. It is cleared during the mod's lobby cleanup paths, when a new lobby is entered, on Main Menu, and on application quit. A host ID from a previous lobby cannot be used for a different lobby.
 
 ## What it does not change
 

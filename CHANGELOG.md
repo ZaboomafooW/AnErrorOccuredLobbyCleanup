@@ -4,6 +4,8 @@
 
 - Reverified the orphaned Steam lobby cleanup paths against Lethal Company v81.
 - Keeps the same cleanup behavior as 1.0.10 while using the game and BepInEx assemblies installed with Lethal Company for builds.
+- Restores the spaced BepInEx display name and keeps the approved Thunderstore icon consistent with the previous release.
+- Clarifies the documented host-cache cleanup wording without changing its behavior.
 - No lobby-cleanup behavior changed.
 
 ## 1.0.10

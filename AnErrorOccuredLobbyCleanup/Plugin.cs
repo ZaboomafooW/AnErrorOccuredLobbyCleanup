@@ -7,7 +7,7 @@ namespace AnErrorOccuredLobbyCleanup;
 public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "ZaboomafooW.AnErrorOccuredLobbyCleanup";
-    public const string PluginName = "AnErrorOccuredLobbyCleanup";
+    public const string PluginName = "An Error Occured Lobby Cleanup";
     public const string PluginVersion = "1.0.11";
 
     private SteamLobbyCleanupController _cleanupController;
