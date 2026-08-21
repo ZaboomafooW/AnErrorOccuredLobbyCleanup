@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.11
+
+- Aligns the repository with the Lethal Company mod project conventions: standard project directory, focused controller ownership, `_camelCase` private fields, and exact BepInEx mod naming.
+- Replaces development-time NuGet package references with the installed BepInEx and Lethal Company assemblies used by the game.
+- Re-verifies the Steam lobby callbacks, lobby cleanup APIs, and player-slot-0 host identity against the v81 decompile.
+- No lobby-cleanup behavior changed.
+
 ## 1.0.10
 
 - Standardizes cleanup wording on "orphaned Steam lobby" in logs and documentation.

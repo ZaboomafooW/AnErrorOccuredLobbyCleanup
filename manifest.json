@@ -1,6 +1,6 @@
 {
   "name": "AnErrorOccuredLobbyCleanup",
-  "version_number": "1.0.10",
+  "version_number": "1.0.11",
   "website_url": "https://github.com/ZaboomafooW/AnErrorOccuredLobbyCleanup",
   "description": "Cleans up orphaned Steam lobbies so other players don't get 'An error occured!' from an invalid Steam join target.",
   "dependencies": [

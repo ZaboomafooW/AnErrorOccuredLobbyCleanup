@@ -8,7 +8,7 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "ZaboomafooW.AnErrorOccuredLobbyCleanup";
     public const string PluginName = "AnErrorOccuredLobbyCleanup";
-    public const string PluginVersion = "1.0.10";
+    public const string PluginVersion = "1.0.11";
 
     private SteamLobbyCleanupController _cleanupController;
 
