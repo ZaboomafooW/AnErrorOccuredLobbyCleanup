@@ -2,17 +2,25 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <AssemblyName>AnErrorOccuredLobbyCleanup</AssemblyName>
     <RootNamespace>AnErrorOccuredLobbyCleanup</RootNamespace>
     <Version>1.0.10</Version>
     <AssemblyVersion>1.0.10.0</AssemblyVersion>
     <FileVersion>1.0.10.0</FileVersion>
+    <LethalCompanyDir Condition="'$(LethalCompanyDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Lethal Company</LethalCompanyDir>
+    <ManagedDir Condition="'$(ManagedDir)' == ''">$(LethalCompanyDir)\Lethal Company_Data\Managed</ManagedDir>
+    <BepInExCoreDir Condition="'$(BepInExCoreDir)' == ''">$(LethalCompanyDir)\BepInEx\core</BepInExCoreDir>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
-    <PackageReference Include="LethalCompany.GameLibs.Steam" Version="81.0.5-ngd.0" />
+    <Reference Include="Assembly-CSharp" HintPath="$(ManagedDir)\Assembly-CSharp.dll" Private="false" />
+    <Reference Include="BepInEx" HintPath="$(BepInExCoreDir)\BepInEx.dll" Private="false" />
+    <Reference Include="Facepunch.Steamworks.Win64" HintPath="$(ManagedDir)\Facepunch.Steamworks.Win64.dll" Private="false" />
+    <Reference Include="Unity.Netcode.Runtime" HintPath="$(ManagedDir)\Unity.Netcode.Runtime.dll" Private="false" />
+    <Reference Include="UnityEngine" HintPath="$(ManagedDir)\UnityEngine.dll" Private="false" />
+    <Reference Include="UnityEngine.CoreModule" HintPath="$(ManagedDir)\UnityEngine.CoreModule.dll" Private="false" />
   </ItemGroup>
 </Project>
